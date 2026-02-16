@@ -1,0 +1,5 @@
+{
+  "name": "Sigmar Tracker",
+  "description": "A comprehensive game state tracker for Warhammer Age of Sigmar, featuring player scoreboards, battle tactics management, and a tactical map viewer.",
+  "requestFramePermissions": []
+}
