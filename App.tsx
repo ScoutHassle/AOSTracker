@@ -1,40 +1,45 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 import { Player, BattleMap, TurnRecord } from './types';
 import { PlayerTrack } from './components/PlayerTrack';
 import { BattleMap as MapView } from './components/BattleMap';
 import { RoundTracker } from './components/RoundTracker';
-import { MAPS, INITIAL_TACTICS } from './constants';
+import { MAPS, AVAILABLE_TACTICS } from './constants';
 
 const App: React.FC = () => {
+  const [gamePhase, setGamePhase] = useState<'SETUP' | 'BATTLE'>('SETUP');
+  
+  // Setup State
+  const [setupMapIndex, setSetupMapIndex] = useState<number>(0);
+  const [p1Tactic1, setP1Tactic1] = useState<string>('');
+  const [p1Tactic2, setP1Tactic2] = useState<string>('');
+  const [p2Tactic1, setP2Tactic1] = useState<string>('');
+  const [p2Tactic2, setP2Tactic2] = useState<string>('');
+
+  // Battle State
   const [currentRound, setCurrentRound] = useState<number>(1);
   const [selectedMapIndex, setSelectedMapIndex] = useState<number>(0);
-  
-  // Turn Management State
   const [turnOrder, setTurnOrder] = useState<number[]>([]);
   const [activeTurnIndex, setActiveTurnIndex] = useState<number>(0);
   const [isSelectingPriority, setIsSelectingPriority] = useState<boolean>(true);
   const [showSummary, setShowSummary] = useState<boolean>(false);
   const [history, setHistory] = useState<TurnRecord[]>([]);
-
-  // Objective Ownership State: Record<objectiveId, playerId | null>
   const [objectiveOwners, setObjectiveOwners] = useState<Record<string, number | null>>({});
 
   const [players, setPlayers] = useState<Player[]>([
     {
       id: 1,
-      name: 'DESTRUCTION',
+      name: 'ATTACKER',
       primaryVp: 0,
       cp: 4,
-      tactics: INITIAL_TACTICS.map(t => ({...t, stages: t.stages.map(s => ({...s}))})),
+      tactics: [],
       colorTheme: 'red'
     },
     {
       id: 2,
-      name: 'ORDER',
+      name: 'DEFENDER',
       primaryVp: 0,
       cp: 4,
-      tactics: INITIAL_TACTICS.map(t => ({...t, stages: t.stages.map(s => ({...s}))})),
+      tactics: [],
       colorTheme: 'blue'
     }
   ]);
@@ -81,7 +86,6 @@ const App: React.FC = () => {
 
       const newTactics = p.tactics.map(t => {
         if (t.id !== tacticId) return t;
-
         const clickedStageIsCompleted = t.stages[clickedIndex].completed;
         let newCompletedCount: number;
         if (clickedStageIsCompleted) {
@@ -89,7 +93,6 @@ const App: React.FC = () => {
         } else {
           newCompletedCount = clickedIndex + 1;
         }
-
         return {
           ...t,
           stages: t.stages.map((s, idx) => ({
@@ -98,18 +101,9 @@ const App: React.FC = () => {
           }))
         };
       });
-
-      return {
-        ...p,
-        tactics: newTactics
-      };
+      return { ...p, tactics: newTactics };
     }));
   }, []);
-
-  const cycleMap = () => {
-    setSelectedMapIndex(prev => (prev + 1) % MAPS.length);
-    setObjectiveOwners({}); // Reset owners when map changes
-  };
 
   const handleObjectiveClick = (objectiveId: string) => {
     setObjectiveOwners(prev => {
@@ -130,7 +124,6 @@ const App: React.FC = () => {
   const captureTurnHistory = () => {
     const activePlayer = players.find(p => p.id === activePlayerId);
     if (!activePlayer) return;
-
     const tacticsVp = calculateTacticsVp(activePlayer);
     const turnRecord: TurnRecord = {
       round: currentRound,
@@ -145,17 +138,14 @@ const App: React.FC = () => {
         completedStages: t.stages.filter(s => s.completed).length
       }))
     };
-
     setHistory(prev => [...prev, turnRecord]);
   };
 
   const nextTurn = () => {
     captureTurnHistory();
-
     if (activeTurnIndex === 0) {
       setActiveTurnIndex(1);
     } else {
-      // End of round
       if (currentRound < 5) {
         const nextRound = currentRound + 1;
         setCurrentRound(nextRound);
@@ -174,6 +164,7 @@ const App: React.FC = () => {
   };
 
   const resetGame = () => {
+    setGamePhase('SETUP');
     setCurrentRound(1);
     setIsSelectingPriority(true);
     setShowSummary(false);
@@ -181,25 +172,186 @@ const App: React.FC = () => {
     setTurnOrder([]);
     setObjectiveOwners({});
     setHistory([]);
-    setPlayers([
-      {
-        id: 1,
-        name: 'DESTRUCTION',
-        primaryVp: 0,
-        cp: 4,
-        tactics: INITIAL_TACTICS.map(t => ({...t, stages: t.stages.map(s => ({...s}))})),
-        colorTheme: 'red'
-      },
-      {
-        id: 2,
-        name: 'ORDER',
-        primaryVp: 0,
-        cp: 4,
-        tactics: INITIAL_TACTICS.map(t => ({...t, stages: t.stages.map(s => ({...s}))})),
-        colorTheme: 'blue'
-      }
-    ]);
+    setP1Tactic1('');
+    setP1Tactic2('');
+    setP2Tactic1('');
+    setP2Tactic2('');
   };
+
+  const isReadyToStart = useMemo(() => {
+    return p1Tactic1 !== '' && p1Tactic2 !== '' && 
+           p2Tactic1 !== '' && p2Tactic2 !== '' && 
+           p1Tactic1 !== p1Tactic2 && p2Tactic1 !== p2Tactic2;
+  }, [p1Tactic1, p1Tactic2, p2Tactic1, p2Tactic2]);
+
+  const startGame = () => {
+    if (!isReadyToStart) return;
+    
+    const selectedP1Tactics = AVAILABLE_TACTICS
+      .filter(t => t.id === p1Tactic1 || t.id === p1Tactic2)
+      .map(t => ({...t, stages: t.stages.map(s => ({...s}))}));
+    const selectedP2Tactics = AVAILABLE_TACTICS
+      .filter(t => t.id === p2Tactic1 || t.id === p2Tactic2)
+      .map(t => ({...t, stages: t.stages.map(s => ({...s}))}));
+
+    setPlayers(prev => [
+      { ...prev[0], tactics: selectedP1Tactics },
+      { ...prev[1], tactics: selectedP2Tactics }
+    ]);
+    setSelectedMapIndex(setupMapIndex);
+    setGamePhase('BATTLE');
+  };
+
+  if (gamePhase === 'SETUP') {
+    return (
+      <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex flex-col animate-in fade-in duration-700 overflow-x-hidden">
+        {/* Header Section */}
+        <header className="py-6 text-center border-b border-slate-900 bg-black/20 backdrop-blur-xl">
+           <h1 className="text-3xl md:text-5xl font-cinzel font-black tracking-[0.3em] text-amber-500 drop-shadow-[0_0_15px_rgba(245,158,11,0.3)] uppercase">Match Configuration</h1>
+           <p className="font-cinzel text-[8px] md:text-[10px] tracking-[0.4em] text-slate-500 mt-2 uppercase">Forge your battlefield and select your tactics</p>
+        </header>
+
+        <main className="flex-1 flex flex-col md:flex-row h-full">
+          {/* Left Player Selection - 20% */}
+          <section className="md:flex-1 bg-gradient-to-r from-red-950/10 to-transparent p-6 md:p-8 flex flex-col items-center justify-center space-y-8 border-r border-slate-900/50">
+             <div className="text-center space-y-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-600 mx-auto shadow-[0_0_15px_rgba(220,38,38,0.5)]" />
+                <h2 className="font-cinzel text-xl md:text-2xl font-black tracking-widest text-red-500 uppercase">ATTACKER</h2>
+             </div>
+
+             <div className="w-full max-w-sm space-y-5">
+                <div className="space-y-2">
+                   <label className="text-[9px] font-cinzel font-black tracking-widest text-slate-400 uppercase">Primary Tactic</label>
+                   <select 
+                     value={p1Tactic1} 
+                     onChange={(e) => setP1Tactic1(e.target.value)}
+                     className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3.5 font-cinzel text-xs font-bold tracking-widest text-slate-200 outline-none focus:border-red-500 transition-colors cursor-pointer appearance-none"
+                   >
+                     <option value="" disabled className="bg-slate-900">SELECT TACTIC</option>
+                     {AVAILABLE_TACTICS.map(t => (
+                       <option key={t.id} value={t.id} className="bg-slate-900" disabled={p1Tactic2 === t.id}>
+                         {t.name.toUpperCase()}
+                       </option>
+                     ))}
+                   </select>
+                </div>
+
+                <div className="space-y-2">
+                   <label className="text-[9px] font-cinzel font-black tracking-widest text-slate-400 uppercase">Secondary Tactic</label>
+                   <select 
+                     value={p1Tactic2} 
+                     onChange={(e) => setP1Tactic2(e.target.value)}
+                     className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3.5 font-cinzel text-xs font-bold tracking-widest text-slate-200 outline-none focus:border-red-500 transition-colors cursor-pointer appearance-none"
+                   >
+                     <option value="" disabled className="bg-slate-900">SELECT TACTIC</option>
+                     {AVAILABLE_TACTICS.map(t => (
+                       <option key={t.id} value={t.id} className="bg-slate-900" disabled={p1Tactic1 === t.id}>
+                         {t.name.toUpperCase()}
+                       </option>
+                     ))}
+                   </select>
+                </div>
+             </div>
+          </section>
+
+          {/* Center Map Selection - 60% */}
+          <section className="md:flex-[3] p-6 md:p-8 flex flex-col items-center justify-center space-y-6 relative bg-black/5">
+             <div className="text-center">
+                <h2 className="font-cinzel text-xs font-black tracking-[0.3em] text-slate-500 uppercase">THE BATTLEFIELD</h2>
+                <div className="h-px w-8 bg-amber-500/20 mx-auto mt-2" />
+             </div>
+
+             <div className="w-full max-w-3xl space-y-6 flex flex-col items-center">
+                <div className="w-full relative group transition-all duration-500">
+                   <MapView map={MAPS[setupMapIndex]} objectiveOwners={{}} onObjectiveClick={() => {}} />
+                   <div className="absolute inset-0 pointer-events-none rounded-3xl shadow-[inset_0_0_60px_rgba(0,0,0,0.3)]" />
+                   <div className="absolute top-4 left-1/2 -translate-x-1/2 font-cinzel text-sm font-black tracking-widest opacity-20 text-white uppercase pointer-events-none">
+                    {MAPS[setupMapIndex].name}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between w-full px-2 max-w-lg">
+                   <button 
+                     onClick={() => setSetupMapIndex((prev) => (prev + MAPS.length - 1) % MAPS.length)}
+                     className="p-3 rounded-full bg-slate-900/50 border border-slate-800 hover:border-amber-500 hover:text-amber-500 transition-all active:scale-90"
+                   >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                   </button>
+                   <div className="text-center">
+                      <div className="font-cinzel text-xl md:text-2xl font-black text-white tracking-[0.2em]">{MAPS[setupMapIndex].name.toUpperCase()}</div>
+                      <div className="text-[7px] font-cinzel font-black tracking-[0.4em] text-slate-500 mt-1 uppercase">Selection {setupMapIndex + 1} of {MAPS.length}</div>
+                   </div>
+                   <button 
+                     onClick={() => setSetupMapIndex((prev) => (prev + 1) % MAPS.length)}
+                     className="p-3 rounded-full bg-slate-900/50 border border-slate-800 hover:border-amber-500 hover:text-amber-500 transition-all active:scale-90"
+                   >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                   </button>
+                </div>
+             </div>
+
+             <button
+                disabled={!isReadyToStart}
+                onClick={startGame}
+                className={`w-full max-w-md py-5 rounded-2xl font-cinzel font-black tracking-[0.5em] text-sm transition-all duration-500 shadow-[0_20px_50px_rgba(0,0,0,0.4)] ${
+                  isReadyToStart
+                    ? 'bg-amber-600 text-white hover:bg-amber-500 hover:-translate-y-1 active:scale-95'
+                    : 'bg-slate-900 text-slate-700 opacity-50 cursor-not-allowed border border-slate-800'
+                }`}
+              >
+                BEGIN THE BATTLE
+              </button>
+          </section>
+
+          {/* Right Player Selection - 20% */}
+          <section className="md:flex-1 bg-gradient-to-l from-sky-950/10 to-transparent p-6 md:p-8 flex flex-col items-center justify-center space-y-8 border-l border-slate-900/50">
+             <div className="text-center space-y-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-sky-600 mx-auto shadow-[0_0_15px_rgba(2,132,199,0.5)]" />
+                <h2 className="font-cinzel text-xl md:text-2xl font-black tracking-widest text-sky-400 uppercase">DEFENDER</h2>
+             </div>
+
+             <div className="w-full max-w-sm space-y-5">
+                <div className="space-y-2">
+                   <label className="text-[9px] font-cinzel font-black tracking-widest text-slate-400 uppercase">Primary Tactic</label>
+                   <select 
+                     value={p2Tactic1} 
+                     onChange={(e) => setP2Tactic1(e.target.value)}
+                     className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3.5 font-cinzel text-xs font-bold tracking-widest text-slate-200 outline-none focus:border-sky-500 transition-colors cursor-pointer appearance-none"
+                   >
+                     <option value="" disabled className="bg-slate-900">SELECT TACTIC</option>
+                     {AVAILABLE_TACTICS.map(t => (
+                       <option key={t.id} value={t.id} className="bg-slate-900" disabled={p2Tactic2 === t.id}>
+                         {t.name.toUpperCase()}
+                       </option>
+                     ))}
+                   </select>
+                </div>
+
+                <div className="space-y-2">
+                   <label className="text-[9px] font-cinzel font-black tracking-widest text-slate-400 uppercase">Secondary Tactic</label>
+                   <select 
+                     value={p2Tactic2} 
+                     onChange={(e) => setP2Tactic2(e.target.value)}
+                     className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3.5 font-cinzel text-xs font-bold tracking-widest text-slate-200 outline-none focus:border-sky-500 transition-colors cursor-pointer appearance-none"
+                   >
+                     <option value="" disabled className="bg-slate-900">SELECT TACTIC</option>
+                     {AVAILABLE_TACTICS.map(t => (
+                       <option key={t.id} value={t.id} className="bg-slate-900" disabled={p2Tactic1 === t.id}>
+                         {t.name.toUpperCase()}
+                       </option>
+                     ))}
+                   </select>
+                </div>
+             </div>
+          </section>
+        </main>
+
+        <footer className="p-4 text-center text-[8px] font-cinzel text-slate-700 tracking-[0.5em] bg-black/10">
+           REKINDLE THE REALMGATE • V1.5.0
+        </footer>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-slate-950 text-slate-100 selection:bg-amber-500/30">
@@ -246,34 +398,6 @@ const App: React.FC = () => {
                   </div>
                 );
               })}
-            </div>
-
-            {/* Battle History Log */}
-            <div className="space-y-4 text-left max-h-[40vh] overflow-y-auto px-4 custom-scrollbar">
-              <h3 className="font-cinzel text-xs font-black tracking-[0.3em] text-amber-500/50 uppercase border-b border-slate-800 pb-2">Battle Chronology</h3>
-              <div className="space-y-3">
-                {history.map((record, idx) => (
-                  <div key={idx} className="bg-slate-900/40 border border-slate-800 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[9px] font-black font-cinzel text-slate-500 bg-slate-800 px-2 py-0.5 rounded">R{record.round} T{record.turn}</span>
-                        <span className={`text-xs font-black font-cinzel tracking-widest ${record.playerColor === 'red' ? 'text-red-500' : 'text-sky-400'}`}>{record.playerName}</span>
-                      </div>
-                      <div className="text-[10px] text-slate-400 font-medium">
-                        Total: <span className="text-white font-bold">{record.totalVp} VP</span> (Primary: {record.primaryVp}, Tactics: {record.tacticsVp})
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {record.tacticsSummary.map((ts, tidx) => (
-                        <div key={tidx} className="text-[8px] bg-slate-950 border border-slate-800 px-2 py-1 rounded flex items-center gap-1.5">
-                           <span className="text-slate-500 uppercase font-bold truncate max-w-[80px]">{ts.name}</span>
-                           <span className="w-4 h-4 rounded-full bg-amber-600/20 text-amber-500 flex items-center justify-center font-black">{ts.completedStages}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
 
             <button
@@ -325,7 +449,7 @@ const App: React.FC = () => {
       <div className="md:hidden flex items-center justify-between p-4 bg-slate-900 border-b border-slate-800">
         <h1 className="font-cinzel font-black tracking-widest text-amber-500">SIGMAR TRACKER</h1>
         <div className="flex gap-2">
-          <button onClick={cycleMap} className="text-[10px] font-cinzel bg-slate-800 px-3 py-1 rounded border border-slate-700">MAP</button>
+          <span className="text-[10px] font-cinzel text-slate-500 bg-slate-800 px-3 py-1 rounded border border-slate-700 uppercase font-black">{MAPS[selectedMapIndex].name}</span>
         </div>
       </div>
 
@@ -344,18 +468,15 @@ const App: React.FC = () => {
 
         {/* Center Area (Map & Turn Control) */}
         <section className="flex-[1.2] lg:flex-[1.5] order-1 md:order-2 flex flex-col items-center justify-center p-4 md:p-8 space-y-6 relative">
-          <div className="w-full max-w-lg space-y-4">
+          <div className="w-full max-w-2xl space-y-4">
             <div className="flex justify-between items-center px-2">
               <div className="flex items-center gap-2">
                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                  <h2 className="font-cinzel text-xs font-bold tracking-[0.3em] text-slate-500 uppercase">Battlefield</h2>
               </div>
-              <button 
-                onClick={cycleMap}
-                className="text-[10px] font-cinzel text-amber-500/50 hover:text-amber-500 transition-colors uppercase font-bold"
-              >
-                Change Map
-              </button>
+              <div className="text-[10px] font-cinzel text-slate-500 font-bold uppercase tracking-widest">
+                {MAPS[selectedMapIndex].name}
+              </div>
             </div>
             
             <div className="relative group perspective-1000">
@@ -364,8 +485,8 @@ const App: React.FC = () => {
                 objectiveOwners={objectiveOwners}
                 onObjectiveClick={handleObjectiveClick}
               />
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 font-cinzel text-sm font-black tracking-widest opacity-20 group-hover:opacity-60 transition-opacity">
-                {MAPS[selectedMapIndex].name.toUpperCase()}
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 font-cinzel text-sm font-black tracking-widest opacity-20 group-hover:opacity-60 transition-opacity text-white uppercase">
+                {MAPS[selectedMapIndex].name}
               </div>
             </div>
 

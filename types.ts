@@ -37,8 +37,11 @@ export interface MapObjective {
   label?: string;
 }
 
+export type TerritoryType = 'attacker' | 'defender' | 'neutral';
+
 export interface BattleMap {
   id: string;
   name: string;
   objectives: MapObjective[];
+  territories: TerritoryType[][]; // 4x4 grid [row][col]
 }

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BattleMap as MapType } from '../types';
+import { BattleMap as MapType, TerritoryType } from '../types';
 
 interface BattleMapProps {
   map: MapType;
@@ -8,21 +8,63 @@ interface BattleMapProps {
   onObjectiveClick: (objectiveId: string) => void;
 }
 
+const getTerritoryColor = (type: TerritoryType) => {
+  switch (type) {
+    case 'attacker': return 'bg-red-950/30';
+    case 'defender': return 'bg-sky-950/30';
+    case 'neutral': return 'bg-slate-800/20';
+    default: return 'transparent';
+  }
+};
+
 export const BattleMap: React.FC<BattleMapProps> = ({ map, objectiveOwners, onObjectiveClick }) => {
   return (
-    <div className="relative w-full aspect-square bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-inner">
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ 
-        backgroundImage: 'radial-gradient(circle, #475569 1px, transparent 1px)', 
-        backgroundSize: '40px 40px' 
-      }} />
+    <div className="relative w-full aspect-[3/2] bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+      {/* 4x4 Territory Grid Background */}
+      <div className="absolute inset-0 grid grid-cols-4 grid-rows-4">
+        {map.territories.flat().map((type, idx) => (
+          <div 
+            key={idx} 
+            className={`transition-colors duration-1000 ${getTerritoryColor(type)}`}
+          />
+        ))}
+      </div>
 
-      {/* Table Surface Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pointer-events-none" />
-      
-      {/* Center Line */}
-      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-700/50 pointer-events-none" />
-      <div className="absolute top-1/2 left-0 right-0 h-px bg-slate-700/50 pointer-events-none" />
+      {/* Grid Dashed Lines */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Vertical lines */}
+        <div className="absolute left-1/4 top-0 bottom-0 w-px border-l border-dashed border-slate-700/40" />
+        <div className="absolute left-2/4 top-0 bottom-0 w-px border-l border-slate-600/60" /> {/* Center */}
+        <div className="absolute left-3/4 top-0 bottom-0 w-px border-l border-dashed border-slate-700/40" />
+        
+        {/* Horizontal lines */}
+        <div className="absolute top-1/4 left-0 right-0 h-px border-t border-dashed border-slate-700/40" />
+        <div className="absolute top-2/4 left-0 right-0 h-px border-t border-slate-600/60" /> {/* Center */}
+        <div className="absolute top-3/4 left-0 right-0 h-px border-t border-dashed border-slate-700/40" />
+      </div>
+
+      {/* Territory Text Labels */}
+      <div className="absolute top-4 left-6 pointer-events-none select-none opacity-40">
+        <h3 className="font-cinzel font-black text-xs md:text-sm tracking-widest text-white leading-tight">
+          ATTACKER'S<br />TERRITORY
+        </h3>
+      </div>
+      <div className="absolute bottom-4 right-6 pointer-events-none select-none opacity-40 text-right">
+        <h3 className="font-cinzel font-black text-xs md:text-sm tracking-widest text-white leading-tight">
+          DEFENDER'S<br />TERRITORY
+        </h3>
+      </div>
+
+      {/* Compass Rose */}
+      <div className="absolute top-4 right-6 flex flex-col items-center pointer-events-none select-none">
+        <span className="font-cinzel font-black text-lg text-white mb-[-8px]">N</span>
+        <div className="w-8 h-8 opacity-40">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white">
+             <path d="M12 2L15 12L12 22L9 12L12 2Z" fill="currentColor" />
+             <path d="M2 12L12 15L22 12L12 9L2 12Z" />
+           </svg>
+        </div>
+      </div>
 
       {/* Objectives */}
       {map.objectives.map((obj) => {
@@ -64,23 +106,9 @@ export const BattleMap: React.FC<BattleMapProps> = ({ map, objectiveOwners, onOb
                 </span>
               )}
             </div>
-            {/* Owner Label Hover Effect */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-8 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity">
-               <span className="text-[8px] font-black font-cinzel tracking-widest text-slate-500 uppercase bg-slate-900/80 px-2 py-0.5 rounded border border-slate-700">
-                  {ownerId === 1 ? 'DESTRUCTION' : ownerId === 2 ? 'ORDER' : 'NEUTRAL'}
-               </span>
-            </div>
           </button>
         );
       })}
-
-      {/* Deployment Indicators */}
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 -rotate-90 pointer-events-none">
-        <span className="text-[10px] font-cinzel text-red-500/30 font-black tracking-[1em]">DEPLOYMENT</span>
-      </div>
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 rotate-90 pointer-events-none">
-        <span className="text-[10px] font-cinzel text-sky-500/30 font-black tracking-[1em]">DEPLOYMENT</span>
-      </div>
     </div>
   );
 };
