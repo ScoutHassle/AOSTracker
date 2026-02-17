@@ -1,7 +1,7 @@
 
 {
   "name": "sigmar-tracker",
-  "homepage": "https://scouthassle.github.io/AOSTracker",
+  "homepage": "https://scouthassle.github.io/AOSTracker/",
   "private": true,
   "version": "1.5.0",
   "type": "module",
