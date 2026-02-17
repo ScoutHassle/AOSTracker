@@ -2,49 +2,202 @@ import { BattleMap, BattleTactic } from './types';
 
 export const MAPS: BattleMap[] = [
   {
-    id: 'scorched-earth',
-    name: 'Scorched Earth',
+    id: 'passing-seasons',
+    name: 'Passing Seasons',
     objectives: [
-      { id: '1', x: 50, y: 50, radius: 10, label: 'C' },
-      { id: '2', x: 20, y: 25, radius: 8 },
-      { id: '3', x: 80, y: 25, radius: 8 },
-      { id: '4', x: 20, y: 75, radius: 8 },
-      { id: '5', x: 80, y: 75, radius: 8 },
+      { id: '1', x: 25, y: 25, radius: 4 },
+      { id: '2', x: 75, y: 25, radius: 4 },
+      { id: '3', x: 25, y: 75, radius: 4 },
+      { id: '4', x: 75, y: 75, radius: 4 },
     ],
     territories: [
-      ['attacker', 'attacker', 'attacker', 'attacker'],
-      ['attacker', 'neutral', 'neutral', 'attacker'],
-      ['defender', 'neutral', 'neutral', 'defender'],
-      ['defender', 'defender', 'defender', 'defender'],
+      [1, 1, 0, 0],
+      [1, 1, 0, 0],
+      [0, 0, 2, 2],
+      [0, 0, 2, 2],
     ]
   },
   {
-    id: 'starstrike',
-    name: 'Starstrike',
+    id: 'paths-of-the-fey',
+    name: 'Paths of the Fey',
     objectives: [
-      { id: '1', x: 50, y: 20, radius: 10 },
-      { id: '2', x: 50, y: 50, radius: 10 },
-      { id: '3', x: 50, y: 80, radius: 10 },
+      { id: '0', x: 50, y: 50, radius: 4 },
+      { id: '1', x: 12.5, y: 25, radius: 4 },
+      { id: '2', x: 87.5, y: 25, radius: 4 },
+      { id: '3', x: 12.5, y: 75, radius: 4 },
+      { id: '4', x: 87.5, y: 75, radius: 4 },
     ],
     territories: [
-      ['attacker', 'attacker', 'attacker', 'attacker'],
-      ['attacker', 'attacker', 'attacker', 'defender'],
-      ['attacker', 'defender', 'defender', 'defender'],
-      ['defender', 'defender', 'defender', 'defender'],
+      [0, 1, 1, 0],
+      [0, 1, 1, 0],
+      [0, 2, 2, 0],
+      [0, 2, 2, 0],
     ]
   },
   {
-    id: 'knife-to-heart',
-    name: 'Knife to the Heart',
+    id: 'roiling-roots',
+    name: 'Roiling Roots',
     objectives: [
-      { id: '1', x: 15, y: 50, radius: 12, label: 'HOME' },
-      { id: '2', x: 85, y: 50, radius: 12, label: 'AWAY' },
+      { id: '1', x: 62.5, y: 12.5, radius: 4 },
+      { id: '2', x: 37.5, y: 37.5, radius: 4 },
+      { id: '3', x: 87.5, y: 37.5, radius: 4 },
+      { id: '4', x: 12.5, y: 62.5, radius: 4 },
+      { id: '5', x: 62.5, y: 62.5, radius: 4 },
+      { id: '6', x: 37.5, y: 87.5, radius: 4 },
     ],
     territories: [
-      ['attacker', 'attacker', 'neutral', 'neutral'],
-      ['attacker', 'attacker', 'neutral', 'neutral'],
-      ['neutral', 'neutral', 'defender', 'defender'],
-      ['neutral', 'neutral', 'defender', 'defender'],
+      [1, 1, 1, 1],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      [2, 2, 2, 2],
+    ]
+  },
+  {
+    id: 'cyclic-shifts',
+    name: 'Cyclic Shifts',
+    objectives: [
+      { id: '1', x: 12.5, y: 12.5, radius: 4 },
+      { id: '2', x: 50, y: 25, radius: 4 },
+      { id: '3', x: 87.5, y: 37.5, radius: 4 },
+      { id: '4', x: 12.5, y: 62.5, radius: 4 },
+      { id: '5', x: 50, y: 75, radius: 4 },
+      { id: '6', x: 87.5, y: 87.5, radius: 4 },
+    ],
+    territories: [
+      [1, 1, 1, 1],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      [2, 2, 2, 2],
+    ]
+  },
+  {
+    id: 'surge-of-slaughter',
+    name: 'Surge of Slaughter',
+    objectives: [
+      { id: '0', x: 37.5, y: 12.5, radius: 4 },
+      { id: '1', x: 87.5, y: 37.5, radius: 4 },
+      { id: '2', x: 50, y: 50, radius: 4 },
+      { id: '3', x: 12.5, y: 62.5, radius: 4 },
+      { id: '4', x: 62.5, y: 87.5, radius: 4 },
+    ],
+    territories: [
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+      [2, 2, 2, 2],
+      [2, 2, 2, 2],
+    ]
+  },
+  {
+    id: 'linked-ley-lines',
+    name: 'Linked Ley Lines',
+    objectives: [
+      { id: '0', x: 50, y: 25, radius: 4 },
+      { id: '1', x: 25, y: 50, radius: 4 },
+      { id: '2', x: 50, y: 50, radius: 4 },
+      { id: '3', x: 75, y: 50, radius: 4 },
+      { id: '4', x: 50, y: 75, radius: 4 },
+    ],
+    territories: [
+      [1, 1, 1, 1], // Attacker
+      [0, 0, 0, 0], // Neutral
+      [0, 0, 0, 0], // Neutral
+      [2, 2, 2, 2], // Defender
+    ]
+  },
+  {
+    id: 'noxious-nexus',
+    name: 'Noxious Nexus',
+    objectives: [
+      { id: '0', x: 25, y: 50, radius: 4 },
+      { id: '1', x: 50, y: 50, radius: 4 },
+      { id: '2', x: 75, y: 50, radius: 4 },
+    ],
+    territories: [
+      [0, 0, 1, 1],
+      [0, 0, 1, 1],
+      [0, 0, 2, 2],
+      [0, 0, 2, 2],
+    ]
+  },
+  {
+    id: 'the-liferoots',
+    name: 'The Liferoots',
+    objectives: [
+      { id: '0', x: 25, y: 50, radius: 4 },
+      { id: '1', x: 75, y: 50, radius: 4 },
+    ],
+    territories: [
+      [1, 1, 0, 0],
+      [1, 1, 2, 2],
+      [1, 1, 2, 2],
+      [0, 0, 2, 2],
+    ]
+  },
+  {
+    id: 'bountiful-equinox',
+    name: 'Bountiful Equinox',
+    objectives: [
+      { id: '0', x: 25, y: 25, radius: 4 },
+      { id: '1', x: 75, y: 25, radius: 4 },
+      { id: '2', x: 50, y: 50, radius: 4 },
+      { id: '3', x: 25, y: 75, radius: 4 },
+      { id: '4', x: 75, y: 75, radius: 4 },
+    ],
+    territories: [
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+      [2, 2, 2, 2],
+      [2, 2, 2, 2],
+    ]
+  },
+  {
+    id: 'lifecycle',
+    name: 'Lifecycle',
+    objectives: [
+      { id: '0', x: 50, y: 25, radius: 4 },
+      { id: '1', x: 25, y: 50, radius: 4 },
+      { id: '2', x: 75, y: 50, radius: 4 },
+      { id: '3', x: 50, y: 75, radius: 4 },
+    ],
+    territories: [
+      [1, 1, 1, 1],
+      [1, 0, 0, 1],
+      [2, 0, 0, 2],
+      [2, 2, 2, 2],
+    ]
+  },
+    {
+    id: 'creeping-corruption',
+    name: 'Creeping Corruption',
+    objectives: [
+      { id: '0', x: 12.5, y: 25, radius: 4 },
+      { id: '1', x: 50, y: 25, radius: 4 },
+      { id: '2', x: 87.5, y: 25, radius: 4 },
+      { id: '3', x: 12.5, y: 75, radius: 4 },
+      { id: '4', x: 50, y: 75, radius: 4 },
+      { id: '5', x: 87.5, y: 75, radius: 4 },
+    ],
+    territories: [
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+      [2, 2, 2, 2],
+      [2, 2, 2, 2],
+    ]
+  },
+  {
+    id: 'grasp-of-thorns',
+    name: 'Grasp of Thorns',
+    objectives: [
+      { id: '0', x: 25, y: 25, radius: 4 },
+      { id: '1', x: 75, y: 25, radius: 4 },
+      { id: '2', x: 25, y: 75, radius: 4 },
+      { id: '3', x: 75, y: 75, radius: 4 },
+    ],
+    territories: [
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+      [2, 2, 2, 2],
+      [2, 2, 2, 2],
     ]
   }
 ];

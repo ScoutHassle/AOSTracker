@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BattleMap as MapType, TerritoryType } from '../types';
 
@@ -10,9 +9,9 @@ interface BattleMapProps {
 
 const getTerritoryColor = (type: TerritoryType) => {
   switch (type) {
-    case 'attacker': return 'bg-red-950/30';
-    case 'defender': return 'bg-sky-950/30';
-    case 'neutral': return 'bg-slate-800/20';
+    case 1: return 'bg-red-950/30'; // attacker
+    case 2: return 'bg-sky-950/30'; // defender
+    case 0: return 'bg-slate-800/20'; // neutral
     default: return 'transparent';
   }
 };
@@ -55,16 +54,7 @@ export const BattleMap: React.FC<BattleMapProps> = ({ map, objectiveOwners, onOb
         </h3>
       </div>
 
-      {/* Compass Rose */}
-      <div className="absolute top-4 right-6 flex flex-col items-center pointer-events-none select-none">
-        <span className="font-cinzel font-black text-lg text-white mb-[-8px]">N</span>
-        <div className="w-8 h-8 opacity-40">
-           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white">
-             <path d="M12 2L15 12L12 22L9 12L12 2Z" fill="currentColor" />
-             <path d="M2 12L12 15L22 12L12 9L2 12Z" />
-           </svg>
-        </div>
-      </div>
+
 
       {/* Objectives */}
       {map.objectives.map((obj) => {

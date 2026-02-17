@@ -1,4 +1,3 @@
-
 export interface BattleTacticStage {
   completed: boolean;
 }
@@ -37,7 +36,12 @@ export interface MapObjective {
   label?: string;
 }
 
-export type TerritoryType = 'attacker' | 'defender' | 'neutral';
+/**
+ * 0: neutral
+ * 1: attacker
+ * 2: defender
+ */
+export type TerritoryType = 0 | 1 | 2;
 
 export interface BattleMap {
   id: string;
