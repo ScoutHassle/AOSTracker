@@ -4,7 +4,7 @@ import { Player, BattleMap, TurnRecord } from './types';
 import { PlayerTrack } from './components/PlayerTrack';
 import { BattleMap as MapView } from './components/BattleMap';
 import { RoundTracker } from './components/RoundTracker';
-import { MAPS, INITIAL_TACTICS } from './constants.tsx';
+import { MAPS, INITIAL_TACTICS } from './constants';
 
 const App: React.FC = () => {
   const [currentRound, setCurrentRound] = useState<number>(1);
