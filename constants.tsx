@@ -203,12 +203,12 @@ export const MAPS: BattleMap[] = [
 ];
 
 export const AVAILABLE_TACTICS: BattleTactic[] = [
-  { id: 't1', name: 'Battle Tactic 1', stages: [{completed: false}, {completed: false}, {completed: false}] },
-  { id: 't2', name: 'Battle Tactic 2', stages: [{completed: false}, {completed: false}, {completed: false}] },
-  { id: 't3', name: 'Battle Tactic 3', stages: [{completed: false}, {completed: false}, {completed: false}] },
-  { id: 't4', name: 'Battle Tactic 4', stages: [{completed: false}, {completed: false}, {completed: false}] },
-  { id: 't5', name: 'Battle Tactic 5', stages: [{completed: false}, {completed: false}, {completed: false}] },
-  { id: 't6', name: 'Battle Tactic 6', stages: [{completed: false}, {completed: false}, {completed: false}] },
+  { id: 't1', name: 'Master the Paths', stages: [{completed: false}, {completed: false}, {completed: false}] },
+  { id: 't2', name: 'Restless Energy', stages: [{completed: false}, {completed: false}, {completed: false}] },
+  { id: 't3', name: 'Intercept and Recover', stages: [{completed: false}, {completed: false}, {completed: false}] },
+  { id: 't4', name: 'Wrathful Cycles', stages: [{completed: false}, {completed: false}, {completed: false}] },
+  { id: 't5', name: 'Scouting Force', stages: [{completed: false}, {completed: false}, {completed: false}] },
+  { id: 't6', name: 'Attuned to Ghyran', stages: [{completed: false}, {completed: false}, {completed: false}] },
 ];
 
 export const INITIAL_TACTICS = AVAILABLE_TACTICS.slice(0, 2);
